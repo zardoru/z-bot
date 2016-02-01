@@ -1,0 +1,16 @@
+{
+  "name": "disroll",
+  "version": "1.0.0",
+  "description": "discord bot for our rp needs",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "agka",
+  "license": "Unlicense",
+  "dependencies": {
+    "discord.js": "^6.0.0",
+    "jsep": "^0.3.0",
+    "ramda": "^0.19.1"
+  }
+}
