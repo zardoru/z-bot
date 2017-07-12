@@ -14,7 +14,7 @@ client.on("message", function(message){
 	bot.dispatch(message);
 });
 
-console.info("Logging into " + config.email)
 bot.setDiscordClient(client);
 bot.setToken(config.token);
-client.login(config.email, config.password);
+bot.setCommandToken(config.cmdtoken);
+bot.connect();
