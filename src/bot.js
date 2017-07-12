@@ -153,12 +153,12 @@ ${replyarrstr}`;
 						var msg = commands[res[1]](res[2]);
 						if (!msg.error){ // no error
 							if (msg.message) // got message
-								client.reply(message, msg.message);
+								message.reply(msg.message);
 						}
 						else
-							client.reply(message, "*Error:* " + msg.error);
+							message.reply("*Error:* " + msg.error);
 					} else { // command not found
-						client.reply(message, "Unknown command *" + res[1] + "*")
+						message.reply(message, "Unknown command *" + res[1] + "*")
 					}
 			}
 		}
