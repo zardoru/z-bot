@@ -10,8 +10,10 @@
   "author": "agka",
   "license": "Unlicense",
   "dependencies": {
+    "csv": "^1.1.1",
     "discord.js": "^11.1.0",
     "jsep": "^0.3.0",
+    "nedb": "^1.8.0",
     "ramda": "^0.19.1"
   }
 }

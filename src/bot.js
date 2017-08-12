@@ -13,7 +13,9 @@ module.exports = (function () {
 				var rolls = [];
 				var sum = 0;
 				for (var i = 0; i < cnt; i++) {
-					var roll = Math.floor(Math.random() * dice + 1);
+					var roll = Math.floor(Math.random() * (dice) + 1);
+					if (roll > dice) roll = dice;
+
 					sum += roll;
 					rolls.push(roll);
 				}
