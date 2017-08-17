@@ -1,4 +1,6 @@
 var checkAnagram = require("./anagram.js")
+const R = require("ramda");
+const Encounters = require('./pk/cmd.js');
 
 module.exports = (function () {
 	var client = null;
@@ -8,27 +10,24 @@ module.exports = (function () {
 	var commands = {
 		"roll": function(param) {
 			var reg = /(\d+)d(\d+)/;
-			var rec = reg.exec(param.trim());
+			var rec = R.map(parseInt, R.tail(reg.exec(param.trim())));
 			if (rec) {
-				var cnt = parseInt(rec[1]);
-				var dice = parseInt(rec[2]);
-				var rolls = [];
-				var sum = 0;
-				for (var i = 0; i < cnt; i++) {
-					var roll = Math.floor(Math.random() * (dice) + 1);
-					if (roll > dice) roll = dice;
-
-					sum += roll;
-					rolls.push(roll);
-				}
-
-				return { message: "*Roll result*: [" +
-									rolls.toString() + "] sum = " +
-									sum	};
+				var cnt = rec[0];
+				var dice = rec[1];
+				var genRoll = (dice) => Math.floor(Math.random() * (dice) + 1);
+				var rolls = R.map(genRoll, R.repeat(cnt, dice));
+				var sum = R.sum(rolls);
+				
+				return { 
+					message: "*Roll result*: [" +
+							  rolls.toString() + "] sum = " +
+							  sum	
+				};
 			}
 
 			return { error: "Invalid dice (<number>d<number>)" };
-		}
+		},
+		"pk": Encounters.doCmd
 	};
 
 	return {
@@ -39,7 +38,8 @@ module.exports = (function () {
 			token = tk;
 		},
 		connect: function() {
-			client.login(token);
+			client.login(token)
+			.then(()=>{ console.info("Connected") });
 		},
 		setCommandToken: function(tk) {
 			cmdtoken = tk;
@@ -47,7 +47,7 @@ module.exports = (function () {
 		dispatch: function(message) {
 			var content = message.content;
 
-			if (content == "thanks alessa") {
+			if (content.toLowerCase() == "thanks alessa") {
 				message.reply(":)");
 				return;
 			}
@@ -57,9 +57,20 @@ module.exports = (function () {
 			{
 				if (content.indexOf("->") != -1)
 				{
-					if (message.author != client.user.username)
+					if (message.author.username != client.user.username) {
 						checkAnagram(message);
+						return;
+					}
 				}
+
+				if (Encounters.isEncounterActive()) {
+					var res = Encounters.matchBattleMessage(message.content);
+					if (res && res.message) {
+						message.reply(res.message);
+						return;
+					}
+				}
+
 				return;
 			}
 
@@ -68,7 +79,7 @@ module.exports = (function () {
 			var reg = /(\w*)\s+(.*)/;
 			var res = reg.exec(content);
 
-			console.log(res);
+			//console.log(res);
 			if (res) { // *match*
 					if (commands.hasOwnProperty(res[1])) { // command exists
 						var msg = commands[res[1]](res[2]);

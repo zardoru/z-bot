@@ -1,3 +1,4 @@
+const R = require("ramda");
 var Discord = require("discord.js");
 var bot = require("./bot.js");
 
@@ -17,4 +18,5 @@ client.on("message", function(message){
 bot.setDiscordClient(client);
 bot.setToken(config.token);
 bot.setCommandToken(config.cmdtoken);
+console.info("Connecting...");
 bot.connect();

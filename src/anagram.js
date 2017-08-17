@@ -1,3 +1,5 @@
+const R = require("ramda");
+
 function alphaFilter(a) {
     return /^[A-Z]$/i.test(a);
 }
@@ -6,17 +8,7 @@ function anagramize(s) {
     return s.toLowerCase().split("").filter(alphaFilter).sort().join("");
 }
 
-function charcounter(s) {
-    var ret = {};
-    for (var i = 0; i < s.length; i++) {
-        if (!ret[s[i]]) 
-            ret[s[i]] = 1;
-        else 
-            ret[s[i]]++;
-    }
-
-    return ret;
-}
+var charcounter = R.countBy(R.identity);
 
 function chardifference(a, b) {
     var ret = {};
@@ -40,15 +32,7 @@ function chardifference(a, b) {
     return ret;
 }
 
-function filterzeroes(diff) {
-    var ret = {};
-    for (var k in diff) {
-        if (diff[k] != 0)
-            ret[k] = diff[k];
-    }
-
-    return ret;
-}
+var filterzeroes = R.filter((it) => it != 0);
 
 function checkAnagram(msg) {
     let c = msg.content.split("->");
@@ -71,12 +55,11 @@ function checkAnagram(msg) {
             cmsg = "missing";
 
         v = Math.abs(v);
-        replyarr.push(`${k} (${v} ${cmsg})`);
+        replyarr.push(`${k}: ${v} ${cmsg}`);
     }
 
     var replyarrstr = replyarr.join("\n");
-    var re = new RegExp("->", "g");
-    var anag = msg.content.replace(re, "=>");
+    var anag = msg.content;
     if (replyarr.length) {
         var out = `The anagram "${anag}" is not valid: differences are:
 ${replyarrstr}`;
