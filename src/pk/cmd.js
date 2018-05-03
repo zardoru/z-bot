@@ -60,17 +60,17 @@ function doCmd(param) {
         var t1 = reduceSpaces(startEncounter[1]).split(" ");
         var t2 = reduceSpaces(startEncounter[3]).split(" ");
         // console.log(t1, t2);
-        return R.merge({}, beginBattleEncounter(t1, t2));
+        return Promise.resolve(R.merge({}, beginBattleEncounter(t1, t2)));
     }
 
     if (param === "endencounter")
-        return R.merge({}, finishBattleEncounter());
+        return Promise.resolve(R.merge({}, finishBattleEncounter()));
 
     //if (param === "heal") {
     //    return R.merge({}, heal());
     //}
 
-    return {};
+    return Promise.resolve({});
 }
 
 function effectiveMsg(mon, move) {

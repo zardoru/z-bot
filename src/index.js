@@ -16,6 +16,8 @@ client.on("message", function(message){
 });
 
 bot.setDiscordClient(client);
+
+console.info("Setting token...");
 bot.setToken(config.token);
 bot.setCommandToken(config.cmdtoken);
 console.info("Connecting...");

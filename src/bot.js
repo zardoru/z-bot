@@ -1,6 +1,8 @@
 var checkAnagram = require("./anagram.js")
 const R = require("ramda");
 const Encounters = require('./pk/cmd.js');
+const request = require("request-promise");
+const cheerio = require("cheerio");
 
 module.exports = (function () {
 	var client = null;
@@ -12,22 +14,43 @@ module.exports = (function () {
 			var reg = /(\d+)d(\d+)/;
 			var rec = R.map(parseInt, R.tail(reg.exec(param.trim())));
 			if (rec) {
-				var cnt = rec[0];
-				var dice = rec[1];
+				var cnt = rec[1];
+				var dice = rec[0];
 				var genRoll = (dice) => Math.floor(Math.random() * (dice) + 1);
 				var rolls = R.map(genRoll, R.repeat(cnt, dice));
 				var sum = R.sum(rolls);
 				
-				return { 
+				return Promise.resolve({ 
 					message: "*Roll result*: [" +
 							  rolls.toString() + "] sum = " +
 							  sum	
-				};
+				});
 			}
 
 			return { error: "Invalid dice (<number>d<number>)" };
 		},
-		"pk": Encounters.doCmd
+		"pk": Encounters.doCmd,
+		"politics": function(cl) {
+			return request({
+				uri: "https://api.whatdoestrumpthink.com/api/v1/quotes/random",
+				json: true
+			})
+		},
+		"meow": function(cl) {
+			return request("http://random.cat")
+				.then((body) => {
+					let $ = cheerio.load(body);
+					var el = $("#cat");
+					// console.info(el);
+					var url = el.attr("src");
+
+					// console.info("meow site: " + url);
+					return {
+						message: "meow",
+						url: url
+					};
+				});
+		}
 	};
 
 	return {
@@ -39,7 +62,8 @@ module.exports = (function () {
 		},
 		connect: function() {
 			client.login(token)
-			.then(()=>{ console.info("Connected") });
+			.then(()=>{ console.info("Connected") })
+			.catch(()=>{ console.error("Couldn't login with provided token: " + token) });
 		},
 		setCommandToken: function(tk) {
 			cmdtoken = tk;
@@ -76,19 +100,35 @@ module.exports = (function () {
 
 			// remove token, check format against regex
 		  content = content.slice(1);
-			var reg = /(\w*)\s+(.*)/;
+			var reg = /(\w*)\s*(.*)/;
 			var res = reg.exec(content);
 
 			//console.log(res);
 			if (res) { // *match*
+					console.info("running command " + res[1]);
+
 					if (commands.hasOwnProperty(res[1])) { // command exists
-						var msg = commands[res[1]](res[2]);
-						if (!msg.error){ // no error
-							if (msg.message) // got message
-								message.reply(msg.message);
-						}
-						else
-							message.reply("*Error:* " + msg.error);
+						var prom = commands[res[1]](res[2]);
+						
+						prom.then((msg) => {
+							if (!msg.error){ // no error
+								if (msg.message) // got message
+								{
+									if (!msg.url)
+										message.reply(msg.message);
+									else 
+									{
+										message.reply(msg.message, {
+											files: [
+												{ attachment: msg.url }
+											]});
+									}
+								}
+							}
+							else
+								message.reply("*Error:* " + msg.error);
+						});
+						
 					} else { // command not found
 						message.reply(message, "Unknown command *" + res[1] + "*")
 					}
