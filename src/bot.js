@@ -8,6 +8,7 @@ module.exports = (function () {
 	var client = null;
 	var token = null;
 	var cmdtoken = null;
+	var name = "z-bot";
 
 	var commands = {
 		"roll": function(param) {
@@ -30,12 +31,12 @@ module.exports = (function () {
 			return { error: "Invalid dice (<number>d<number>)" };
 		},
 		"pk": Encounters.doCmd,
-		"politics": function(cl) {
-			return request({
-				uri: "https://api.whatdoestrumpthink.com/api/v1/quotes/random",
-				json: true
-			})
-		},
+		// "politics": function(cl) {
+		// 	return request({
+		// 		uri: "https://api.whatdoestrumpthink.com/api/v1/quotes/random",
+		// 		json: true
+		// 	})
+		// },
 		"meow": function(cl) {
 			return request("http://random.cat")
 				.then((body) => {
@@ -50,6 +51,17 @@ module.exports = (function () {
 						url: url
 					};
 				});
+		},
+		"uwu": function(msg) {
+			return Promise.resolve({
+				message: R.map(function(x) {
+					if (x == "l") return "w"
+					if (x == "L") return "W";
+					if (x == "r") return "w";
+					if (x == "R") return "W";
+					return x;
+				}, msg.split("")).join("") + " uwu"
+			});
 		}
 	};
 
@@ -61,6 +73,10 @@ module.exports = (function () {
 			token = tk;
 		},
 		connect: function() {
+			client.on('ready', () => {
+				client.user.setUsername(name);
+			});
+
 			client.login(token)
 			.then(()=>{ console.info("Connected") })
 			.catch(()=>{ console.error("Couldn't login with provided token: " + token) });
@@ -68,10 +84,13 @@ module.exports = (function () {
 		setCommandToken: function(tk) {
 			cmdtoken = tk;
 		},
+		setName: function(nm) {
+			name = nm;
+		},
 		dispatch: function(message) {
 			var content = message.content;
 
-			if (content.toLowerCase() == "thanks alessa") {
+			if (content.toLowerCase() == "thanks " + name.toLowerCase()) {
 				message.reply(":)");
 				return;
 			}
@@ -130,7 +149,10 @@ module.exports = (function () {
 						});
 						
 					} else { // command not found
-						message.reply(message, "Unknown command *" + res[1] + "*")
+						var revmsg = content.split("").reverse().join("");
+						if (content.length % 2 == 1) // is even... counting cmd token
+							revmsg = revmsg.substring(1);
+						message.reply(content + revmsg); 
 					}
 			}
 		}

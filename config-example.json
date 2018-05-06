@@ -1,4 +1,5 @@
 {
     "cmdtoken": "!",
-    "token": "your-discord-bot-token"
+    "token": "your-discord-bot-token",
+    "name":"z-bot"
 }
