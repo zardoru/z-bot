@@ -13,22 +13,33 @@ module.exports = (function () {
 	var commands = {
 		"roll": function(param) {
 			var reg = /(\d+)d(\d+)/;
-			var rec = R.map(parseInt, R.tail(reg.exec(param.trim())));
-			if (rec) {
-				var cnt = rec[1];
-				var dice = rec[0];
-				var genRoll = (dice) => Math.floor(Math.random() * (dice) + 1);
-				var rolls = R.map(genRoll, R.repeat(cnt, dice));
-				var sum = R.sum(rolls);
-				
-				return Promise.resolve({ 
-					message: "*Roll result*: [" +
-							  rolls.toString() + "] sum = " +
-							  sum	
-				});
-			}
+			return new Promise((resolve, reject) => {
+				var line = reg.exec(param.trim());
+				if (!line) {
+					reject("Invalid dice (<number>d<number>)");
+					return;
+				}
 
-			return { error: "Invalid dice (<number>d<number>)" };
+				var rec = R.map(parseInt, R.tail());
+				if (rec) {
+					var cnt = rec[1];
+					var dice = rec[0];
+					var genRoll = (dice) => Math.floor(Math.random() * (dice) + 1);
+					var rolls = R.map(genRoll, R.repeat(cnt, dice));
+					var sum = R.sum(rolls);
+
+					resolve({ 
+						message: "*Roll result*: [" +
+								rolls.toString() + "] sum = " +
+								sum	
+					});
+				} else {
+					reject("Invalid dice (<number>d<number>)");
+					return;
+				}
+					
+		
+			});
 		},
 		"pk": Encounters.doCmd,
 		// "politics": function(cl) {
@@ -62,6 +73,11 @@ module.exports = (function () {
 					return x;
 				}, msg.split("")).join("") + " uwu"
 			});
+		},
+		"mud": (msg) => {
+			return Promise.resolve({
+				message: "kip"
+			})
 		}
 	};
 
@@ -91,7 +107,7 @@ module.exports = (function () {
 			var content = message.content;
 
 			if (content.toLowerCase() == "thanks " + name.toLowerCase()) {
-				message.reply(":)");
+				message.reply("::)");
 				return;
 			}
 
@@ -124,13 +140,13 @@ module.exports = (function () {
 
 			//console.log(res);
 			if (res) { // *match*
-					console.info("running command " + res[1]);
+					var cmd = res[1].toLowerCase();
+					console.info("running command " + cmd);
 
-					if (commands.hasOwnProperty(res[1])) { // command exists
-						var prom = commands[res[1]](res[2]);
+					if (commands.hasOwnProperty(cmd)) { // command exists
+						var prom = commands[cmd](res[2]);
 						
 						prom.then((msg) => {
-							if (!msg.error){ // no error
 								if (msg.message) // got message
 								{
 									if (!msg.url)
@@ -143,9 +159,8 @@ module.exports = (function () {
 											]});
 									}
 								}
-							}
-							else
-								message.reply("*Error:* " + msg.error);
+						}).catch((msg) => {
+							message.reply("*Error:* " + msg);	
 						});
 						
 					} else { // command not found
