@@ -3,12 +3,15 @@ const R = require("ramda");
 const Encounters = require('./pk/cmd.js');
 const request = require("request-promise");
 const cheerio = require("cheerio");
+const fs = require("fs");
 
 module.exports = (function () {
 	var client = null;
 	var token = null;
 	var cmdtoken = null;
 	var name = "z-bot";
+
+	var wildmagicTable = [];
 
 	var commands = {
 		"roll": function(param) {
@@ -20,7 +23,7 @@ module.exports = (function () {
 					return;
 				}
 
-				var rec = R.map(parseInt, R.tail());
+				var rec = R.map(parseInt, R.tail(line));
 				if (rec) {
 					var cnt = rec[1];
 					var dice = rec[0];
@@ -78,6 +81,11 @@ module.exports = (function () {
 			return Promise.resolve({
 				message: "kip"
 			})
+		},
+		"wildmagic": (msg) => {
+			return Promise.resolve({
+				message: wildmagicTable[Math.floor(Math.random() * wildmagicTable.length)]
+			});
 		}
 	};
 
@@ -92,6 +100,10 @@ module.exports = (function () {
 			client.on('ready', () => {
 				client.user.setUsername(name);
 			});
+
+			console.info("Reading wild magic table");
+			var txt = fs.readFileSync("data/wildmagic.csv").toString("utf-8");
+			wildmagicTable = txt.split("\n");
 
 			client.login(token)
 			.then(()=>{ console.info("Connected") })
