@@ -8,7 +8,7 @@ function readCSV(filename)
 }
 
 function loadTypeChart() {
-    const csvTypeChart = readCSV("pkdata/typechart.csv");
+    const csvTypeChart = readCSV("data/typechart.csv");
     const tcHeader = csvTypeChart[0];
     // transpose to get [def][atk] instead of the
     // other way around
@@ -28,7 +28,7 @@ function autoparse(d) {
 }
 
 function loadBaseStats() {
-    const csvd = readCSV("pkdata/bstat.csv");
+    const csvd = readCSV("data/bstat.csv");
     // Remove the code column... leave the # intact
     const header = R.remove(1, 1, csvd[0]);
     // Non-header entries
@@ -47,7 +47,7 @@ function loadBaseStats() {
 }
 
 function loadMonTypes() {
-    var csv = R.tail(readCSV("pkdata/mtype.csv"));
+    var csv = R.tail(readCSV("data/mtype.csv"));
     var codeList = R.map(R.head, csv);
     return R.zipObj(codeList, R.map(R.tail, csv));
 }
@@ -63,7 +63,7 @@ function joinStatsToTypes(stats, types) {
 }
 
 function loadMoves() {
-    var csv = readCSV("pkdata/mlist.csv");
+    var csv = readCSV("data/mlist.csv");
     var header = R.head(csv);
     var data = R.tail(csv);
     var codeList = R.map(R.head, data);
@@ -72,7 +72,7 @@ function loadMoves() {
 }
 
 function loadMovesByName() {
-    var csv = readCSV("pkdata/mlist.csv");
+    var csv = readCSV("data/mlist.csv");
     var header = R.head(csv);
     var data = R.tail(csv);
     var codeList = R.map(R.prop(1), data);

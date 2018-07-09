@@ -20,5 +20,7 @@ bot.setDiscordClient(client);
 console.info("Setting token...");
 bot.setToken(config.token);
 bot.setCommandToken(config.cmdtoken);
+if (config.name) bot.setName(config.name);
+
 console.info("Connecting...");
 bot.connect();
