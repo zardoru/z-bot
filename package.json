@@ -10,11 +10,9 @@
   "author": "agka",
   "license": "Unlicense",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
-    "csv": "^1.1.1",
-    "discord.js": "^11.1.0",
-    "ramda": "^0.24.1",
-    "request": "^2.85.0",
-    "request-promise": "^4.2.2"
+    "bent": "^7.1.1",
+    "csv": "^5.x.x",
+    "discord.js": "^12.x.x",
+    "ramda": "^0.27.0"
   }
 }

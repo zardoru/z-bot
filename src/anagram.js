@@ -43,7 +43,6 @@ function checkAnagram(msg) {
     var countRight = charcounter(c[1]);
 
     var diff = filterzeroes(chardifference(countLeft, countRight));
-    var reply = "";
     var replyarr = [];
     for (var k in diff) {
         var v = diff[k];

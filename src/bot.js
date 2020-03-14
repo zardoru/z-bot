@@ -1,9 +1,8 @@
 var checkAnagram = require("./anagram.js")
-const R = require("ramda");
 const Encounters = require('./pk/cmd.js');
-const request = require("request-promise");
-const cheerio = require("cheerio");
+const bent = require("bent");
 const fs = require("fs");
+const roll = require("./roll.js").roll;
 
 module.exports = (function () {
 	var client = null;
@@ -14,43 +13,7 @@ module.exports = (function () {
 	var wildmagicTable = [];
 
 	var commands = {
-		"roll": function(param) {
-			var reg = /(\d+)?d(\d+)?(([\+\-\*])(\d+))?/;
-			var regresult = reg.exec(param.trim());
-			if (regresult) {
-				var rec = R.tail(regresult);
-				var cnt = rec[0] || 1;
-				var dice = rec[1] || 6;
-				var genRoll = (dice) => Math.floor(Math.random() * (dice) + 1);
-				var rolls = R.map(genRoll, R.repeat(dice, cnt));
-				var sum = R.sum(rolls);
-				var rollresult = rolls.toString();
-				
-				var op = rec[3];
-				if (op) {
-					var val = parseInt(rec[4]);
-
-					switch (op) {
-						case "+":
-							sum = sum + val; break;
-						case "*":
-							sum = sum * val; break;
-						case "-":
-							sum = sum - val; break;
-					}
-
-					return Promise.resolve({
-						message: `**Roll result**: [${rollresult}] ${param.trim()} = ${sum}`
-					});
-				}
-				
-				return Promise.resolve({ 
-					message: `**Roll result**: [${rollresult}] sum = ${sum}`
-				});
-			}
-
-			return Promise.resolve({ error: "Invalid dice (try <number>?d<number>?([+-*]<number>)?)" });
-		},
+		"roll": roll,
 		"pk": Encounters.doCmd,
 		// "politics": function(cl) {
 		// 	return request({
@@ -59,19 +22,34 @@ module.exports = (function () {
 		// 	})
 		// },
 		"meow": function(cl) {
-			return request("http://random.cat")
+			const req = bent('http://aws.random.cat/meow', 'json')
+			return req()
 				.then((body) => {
-					let $ = cheerio.load(body);
-					var el = $("#cat");
-					// console.info(el);
-					var url = el.attr("src");
-
-					// console.info("meow site: " + url);
 					return {
 						message: "meow",
-						url: url
+						url: body.file
 					};
 				});
+		},
+		"what": (cl) => {
+			const req = bent('https://randomfox.ca/floof/', 'json')
+			return req()
+				.then((body) => {
+					return {
+						message: "fox",
+						url: body.image
+					}
+				})
+		},
+		"woof": (cl) => {
+			const req = bent('https://random.dog/woof.json', 'json')
+			return req()
+					.then((body) => {
+						return {
+							message: "woof!",
+							url: body.url
+						}
+					})
 		},
 		"uwu": function(msg) {
 			return Promise.resolve({
