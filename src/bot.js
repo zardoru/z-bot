@@ -2,6 +2,7 @@ var checkAnagram = require("./anagram.js")
 const Encounters = require('./pk/cmd.js');
 const bent = require("bent");
 const fs = require("fs");
+const R = require("ramda")
 const roll = require("./roll.js").roll;
 
 module.exports = (function () {
@@ -11,8 +12,9 @@ module.exports = (function () {
 	var name = "z-bot";
 
 	var wildmagicTable = [];
-
-	var commands = {
+	var commands = {};
+	
+	commands = {
 		"roll": roll,
 		"pk": Encounters.doCmd,
 		// "politics": function(cl) {
@@ -71,9 +73,13 @@ module.exports = (function () {
 			return Promise.resolve({
 				message: wildmagicTable[Math.floor(Math.random() * wildmagicTable.length)]
 			});
+		},
+		"help": (msg) => {
+			return Promise.resolve({
+				message: R.join(", ", Object.keys(commands))
+			})
 		}
 	};
-
 	return {
 		setDiscordClient: function(cl) {
 			client = cl;
