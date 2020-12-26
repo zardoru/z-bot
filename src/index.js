@@ -21,6 +21,11 @@ console.info("Setting token...");
 bot.setToken(config.token);
 bot.setCommandToken(config.cmdtoken);
 if (config.name) bot.setName(config.name);
+bot.setAuthorized(config.authorize);
+if (config.print) {
+	console.info("printing messages...");
+	bot.setPrint();
+}
 
 console.info("Connecting...");
 bot.connect();

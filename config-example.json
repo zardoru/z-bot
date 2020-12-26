@@ -1,5 +1,7 @@
 {
     "cmdtoken": "!",
     "token": "your-discord-bot-token",
-    "name":"z-bot"
+    "name":"z-bot",
+    "authorize": [],
+    "print": true
 }

@@ -9,7 +9,10 @@ module.exports = (function () {
 	var client = null;
 	var token = null;
 	var cmdtoken = null;
+	var authorized = [];
 	var name = "z-bot";
+	var doPrint = false;
+	var sayChan = null;
 
 	var wildmagicTable = [];
 	var commands = {};
@@ -78,6 +81,53 @@ module.exports = (function () {
 			return Promise.resolve({
 				message: R.join(", ", Object.keys(commands))
 			})
+		},
+		"viewchan": async (cnt, msg) => {
+			if (authorized.indexOf(msg.author.id) == -1) {
+				console.log(`${authorized[0]} , ${msg.channel.id}`);
+				return {};
+			}
+
+			var msgRet = "";
+			client.channels.cache.each((chan, snowflake) => {
+				if (chan.type == "text") {
+					msgRet += `${chan.guild.name} => ${chan.name}: ${snowflake}\n`;
+					if (msgRet.length > 1500) {
+						msg.reply(msgRet);
+						msgRet = "";
+					}
+				}
+			});
+
+			return {
+				message: msgRet
+			}
+		},
+		"saychan": async (cnt, msg) => {
+			if (authorized.indexOf(msg.author.id) == -1) {
+				console.log(`${authorized[0]} , ${msg.channel.id}`);
+				return {};
+			}
+
+			sayChan = client.channels.resolve(cnt);
+			return {
+				message: `resolved to ${sayChan}`
+			}
+		},
+		"s": async (cnt, msg) => {
+			if (authorized.indexOf(msg.author.id) == -1) {
+				console.log(`${authorized[0]} , ${msg.channel.id}`);
+				return {};
+			}
+
+			if (!sayChan) {
+				return {
+					message: "saychan unset"
+				}
+			}
+
+			sayChan.send(cnt);
+			return {};
 		}
 	};
 	return {
@@ -103,11 +153,24 @@ module.exports = (function () {
 		setCommandToken: function(tk) {
 			cmdtoken = tk;
 		},
+		setAuthorized: function(arr) {
+			authorized = arr;
+		},
 		setName: function(nm) {
 			name = nm;
 		},
+		setPrint: function() {
+			doPrint = true;
+		},
 		dispatch: function(message) {
 			var content = message.content;
+
+			if (doPrint) {
+				if (message.guild)
+					console.log(`[${message.guild.name} #${message.channel.name}:${message.author.username}] ${message.content}`);
+				else 
+					console.log(`[DM] ${message.author.username}: ${message.content}`);
+			}
 
 			if (content.toLowerCase() == "thanks " + name.toLowerCase()) {
 				message.reply("::)");
@@ -147,7 +210,7 @@ module.exports = (function () {
 					console.info("running command " + cmd);
 
 					if (commands.hasOwnProperty(cmd)) { // command exists
-						var prom = commands[cmd](res[2]);
+						var prom = commands[cmd](res[2], message);
 						
 						prom.then((msg) => {
 								if (msg.message) // got message
